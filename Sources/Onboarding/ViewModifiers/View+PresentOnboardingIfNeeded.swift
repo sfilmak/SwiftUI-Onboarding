@@ -13,31 +13,22 @@ import SwiftUI
 public extension View {
     /// Presents onboarding content as a sheet if the user hasn't completed it yet.
     ///
-    /// This modifier presents the onboarding screen as a sheet over your view hierarchy
-    /// while the onboarding is not complete, and dismisses automatically afterwards.
-    ///
     /// - Parameters:
     ///   - storage: The AppStorage property for tracking completion state (defaults to `.onboarding`)
     ///   - config: Configuration for customizing the onboarding experience
-    ///   - appIcon: The app icon image to display in the onboarding
     ///   - continueAction: Optional custom action to perform when continuing (defaults to marking complete)
-    ///   - dataPrivacyContent: A view builder that provides the data privacy content
     ///
     /// - Returns: A view that presents onboarding in a sheet when needed
-    func presentOnboardingIfNeeded<C: View>(
+    func presentOnboardingIfNeeded(
         storage: AppStorage<Bool> = .onboarding,
         config: OnboardingConfiguration,
-        appIcon: Image,
-        continueAction: (() -> Void)? = nil,
-        @ViewBuilder dataPrivacyContent: @escaping () -> C
+        continueAction: (() -> Void)? = nil
     ) -> some View {
         modifier(
-            OnboardingSheetModifier<C, EmptyView>(
+            OnboardingSheetModifier<EmptyView>(
                 storage: storage,
                 config: config,
-                appIcon: appIcon,
                 continueAction: continueAction,
-                dataPrivacyContent: dataPrivacyContent,
                 flowContent: nil
             )
         )
@@ -47,21 +38,17 @@ public extension View {
     ///
     /// - Parameters:
     ///   - flowContent: A view builder for additional steps after the welcome screen.
-    func presentOnboardingIfNeeded<C: View, F: View>(
+    func presentOnboardingIfNeeded<F: View>(
         storage: AppStorage<Bool> = .onboarding,
         config: OnboardingConfiguration,
-        appIcon: Image,
         continueAction: (() -> Void)? = nil,
-        @ViewBuilder dataPrivacyContent: @escaping () -> C,
         @ViewBuilder flowContent: @escaping () -> F
     ) -> some View {
         modifier(
-            OnboardingSheetModifier<C, F>(
+            OnboardingSheetModifier<F>(
                 storage: storage,
                 config: config,
-                appIcon: appIcon,
                 continueAction: continueAction,
-                dataPrivacyContent: dataPrivacyContent,
                 flowContent: flowContent
             )
         )
@@ -69,11 +56,9 @@ public extension View {
 }
 
 @MainActor
-private struct OnboardingSheetModifier<C: View, F: View> {
+private struct OnboardingSheetModifier<F: View> {
     private let config: OnboardingConfiguration
-    private let appIcon: Image
     private let continueAction: (() -> Void)?
-    private let dataPrivacyContent: () -> C
     private let flowContent: (() -> F)?
     @AppStorage private var isOnboardingCompleted: Bool
     @State private var isWelcomeScreenCompleted: Bool = false
@@ -81,16 +66,12 @@ private struct OnboardingSheetModifier<C: View, F: View> {
     init(
         storage: AppStorage<Bool>,
         config: OnboardingConfiguration,
-        appIcon: Image,
         continueAction: (() -> Void)?,
-        @ViewBuilder dataPrivacyContent: @escaping () -> C,
         flowContent: (() -> F)? = nil
     ) {
         self._isOnboardingCompleted = storage
         self.config = config
-        self.appIcon = appIcon
         self.continueAction = continueAction
-        self.dataPrivacyContent = dataPrivacyContent
         self.flowContent = flowContent
     }
 
@@ -141,10 +122,7 @@ private extension OnboardingSheetModifier {
         switch config.welcomeScreen {
         case let .apple(configuration):
             AppleWelcomeScreen(
-                config: configuration,
-                appIcon: appIcon,
-                continueAction: handleContinue,
-                dataPrivacyContent: dataPrivacyContent
+                config: configuration.with(continueAction: handleContinue)
             )
         }
     }
@@ -154,13 +132,7 @@ private extension OnboardingSheetModifier {
     VStack {
         Spacer()
     }
-    .presentOnboardingIfNeeded(
-        config: .mock,
-        appIcon: Image(.onboardingKitMockAppIcon),
-        dataPrivacyContent: {
-            Text("Privacy Policy Content")
-        }
-    )
+    .presentOnboardingIfNeeded(config: .mock)
 }
 
 #Preview("Welcome Screen with Flow") {
@@ -169,10 +141,6 @@ private extension OnboardingSheetModifier {
     }
     .presentOnboardingIfNeeded(
         config: .mock,
-        appIcon: Image(.onboardingKitMockAppIcon),
-        dataPrivacyContent: {
-            Text("Privacy Policy Content")
-        },
         flowContent: {
             Text("Flow Content")
         }

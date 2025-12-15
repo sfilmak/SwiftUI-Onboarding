@@ -11,38 +11,48 @@ public struct AppleWelcomeScreen {
     public struct Configuration {
         public let accentColor: Color
         public let appDisplayName: String
+        public let appIcon: Image
         public let features: [FeatureInfo]
+        public let privacyPolicyURL: URL?
         public let titleSectionAlignment: HorizontalAlignment
+        public let continueAction: () -> Void
 
         public init(
             accentColor: Color = .blue,
             appDisplayName: String,
+            appIcon: Image,
             features: [FeatureInfo],
-            titleSectionAlignment: HorizontalAlignment = .leading
+            privacyPolicyURL: URL? = nil,
+            titleSectionAlignment: HorizontalAlignment = .leading,
+            continueAction: @escaping () -> Void = {}
         ) {
             self.accentColor = accentColor
             self.appDisplayName = appDisplayName
+            self.appIcon = appIcon
             self.features = features
+            self.privacyPolicyURL = privacyPolicyURL
             self.titleSectionAlignment = titleSectionAlignment
+            self.continueAction = continueAction
+        }
+
+        func with(continueAction: @escaping () -> Void) -> Self {
+            .init(
+                accentColor: accentColor,
+                appDisplayName: appDisplayName,
+                appIcon: appIcon,
+                features: features,
+                privacyPolicyURL: privacyPolicyURL,
+                titleSectionAlignment: titleSectionAlignment,
+                continueAction: continueAction
+            )
         }
     }
 
     private let config: Configuration
-    private let appIcon: Image
-    private let continueAction: () -> Void
-    private let dataPrivacyContent: () -> AnyView
     @State private var isAnimating = false
 
-    public init<C: View>(
-        config: Configuration,
-        appIcon: Image,
-        continueAction: @escaping () -> Void,
-        @ViewBuilder dataPrivacyContent: @escaping () -> C
-    ) {
+    public init(config: Configuration) {
         self.config = config
-        self.appIcon = appIcon
-        self.continueAction = continueAction
-        self.dataPrivacyContent = { AnyView(dataPrivacyContent()) }
     }
 
     private func onAppear() {
@@ -56,7 +66,9 @@ public struct AppleWelcomeScreen {
 public extension AppleWelcomeScreen.Configuration {
     static let mock = Self(
         appDisplayName: .init("Onboarding"),
-        features: [.mock, .mock2, .mock3, .mock4, .mock5, .mock6]
+        appIcon: Image(.onboardingKitMockAppIcon),
+        features: [.mock, .mock2, .mock3, .mock4, .mock5, .mock6],
+        privacyPolicyURL: URL(string: "https://example.com/privacy")
     )
 }
 
@@ -82,7 +94,6 @@ extension AppleWelcomeScreen: View {
     private var titleSection: some View {
         TitleSection(
             config: config,
-            appIcon: appIcon,
             shouldHideAppIcon: !isAnimating
         )
         .offset(y: isAnimating ? 0 : 200)
@@ -98,21 +109,12 @@ extension AppleWelcomeScreen: View {
         BottomSection(
             accentColor: config.accentColor,
             appDisplayName: config.appDisplayName,
-            continueAction: continueAction,
-            dataPrivacyContent: dataPrivacyContent
+            privacyPolicyURL: config.privacyPolicyURL,
+            continueAction: config.continueAction
         )
     }
 }
 
 #Preview("Default") {
-    AppleWelcomeScreen(
-        config: .mock,
-        appIcon: Image(.onboardingKitMockAppIcon),
-        continueAction: {
-            print("Continue Tapped")
-        },
-        dataPrivacyContent: {
-            Text("Privacy Policy Content")
-        }
-    )
+    AppleWelcomeScreen(config: .mock)
 }

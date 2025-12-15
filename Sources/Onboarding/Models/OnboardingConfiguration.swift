@@ -18,6 +18,7 @@ import SwiftUI
 /// let config = OnboardingConfiguration.apple(
 ///     accentColor: .blue,
 ///     appDisplayName: "My App",
+///     appIcon: Image("AppIcon"),
 ///     features: [
 ///         FeatureInfo(
 ///             image: Image(systemName: "star.fill"),
@@ -25,6 +26,7 @@ import SwiftUI
 ///             content: "This feature will change your life!"
 ///         )
 ///     ],
+///     privacyPolicyURL: URL(string: "https://example.com/privacy"),
 ///     titleSectionAlignment: .center
 /// )
 /// ```
@@ -48,12 +50,16 @@ public extension OnboardingConfiguration {
     /// - Parameters:
     ///   - accentColor: The primary accent color (defaults to blue)
     ///   - appDisplayName: The display name of the app
+    ///   - appIcon: The app icon to display on the welcome screen
     ///   - features: Array of features to showcase
+    ///   - privacyPolicyURL: Link to the privacy policy to be opened from the welcome screen
     ///   - titleSectionAlignment: Alignment for the title section (defaults to leading)
     static func apple(
         accentColor: Color = .blue,
         appDisplayName: String,
+        appIcon: Image,
         features: [FeatureInfo],
+        privacyPolicyURL: URL? = nil,
         titleSectionAlignment: HorizontalAlignment = .leading
     ) -> Self {
         .init(
@@ -61,7 +67,9 @@ public extension OnboardingConfiguration {
                 .init(
                     accentColor: accentColor,
                     appDisplayName: appDisplayName,
+                    appIcon: appIcon,
                     features: features,
+                    privacyPolicyURL: privacyPolicyURL,
                     titleSectionAlignment: titleSectionAlignment
                 )
             )
@@ -70,6 +78,8 @@ public extension OnboardingConfiguration {
 
     static let mock = Self.apple(
         appDisplayName: .init("Onboarding"),
-        features: [.mock, .mock2, .mock3, .mock4, .mock5, .mock6]
+        appIcon: Image(.onboardingKitMockAppIcon),
+        features: [.mock, .mock2, .mock3, .mock4, .mock5, .mock6],
+        privacyPolicyURL: URL(string: "https://example.com/privacy")
     )
 }

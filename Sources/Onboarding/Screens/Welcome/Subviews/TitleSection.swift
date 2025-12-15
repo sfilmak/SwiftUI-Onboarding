@@ -10,17 +10,14 @@ import SwiftUI
 @MainActor
 struct TitleSection {
     private let config: AppleWelcomeScreen.Configuration
-    private let appIcon: Image
     private let shouldHideAppIcon: Bool
     @State private var isAnimating = false
 
     init(
         config: AppleWelcomeScreen.Configuration,
-        appIcon: Image,
         shouldHideAppIcon: Bool
     ) {
         self.config = config
-        self.appIcon = appIcon
         self.shouldHideAppIcon = shouldHideAppIcon
     }
 
@@ -54,7 +51,7 @@ extension TitleSection: View {
     @ViewBuilder
     private var appIconView: some View {
         if shouldHideAppIcon {
-            appIcon
+            config.appIcon
                 .resizable()
                 .frame(width: 60, height: 60)
                 .clipShape(.rect(cornerRadius: 10))
@@ -78,7 +75,6 @@ extension TitleSection: View {
 #Preview {
     TitleSection(
         config: .mock,
-        appIcon: Image(.onboardingKitMockAppIcon),
         shouldHideAppIcon: true
     )
 }

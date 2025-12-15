@@ -25,12 +25,10 @@ public extension View {
     ///     .showOnboardingIfNeeded(
     ///         config: OnboardingConfiguration.apple(
     ///             appDisplayName: "My App",
+    ///             appIcon: Image("AppIcon"),
+    ///             privacyPolicyURL: URL(string: "https://example.com/privacy"),
     ///             features: myFeatures
-    ///         ),
-    ///         appIcon: Image("AppIcon"),
-    ///         dataPrivacyContent: {
-    ///             PrivacyPolicyView()
-    ///         }
+    ///         )
     ///     )
     /// ```
     ///
@@ -40,38 +38,30 @@ public extension View {
     /// ContentView()
     ///     .showOnboardingIfNeeded(
     ///         config: config,
-    ///         appIcon: appIcon,
     ///         continueAction: {
     ///             // Custom logic before marking as complete
     ///             analytics.track("onboarding_completed")
     ///             // Onboarding will be marked complete automatically
-    ///         },
-    ///         dataPrivacyContent: { PrivacyView() }
+    ///         }
     ///     )
     /// ```
     ///
     /// - Parameters:
     ///   - storage: The AppStorage property for tracking completion state (defaults to `.onboarding`)
     ///   - config: Configuration for customizing the onboarding experience
-    ///   - appIcon: The app icon image to display in the onboarding
     ///   - continueAction: Optional custom action to perform when continuing (defaults to marking complete)
-    ///   - dataPrivacyContent: A view builder that provides the data privacy content
     ///
     /// - Returns: A modified view that conditionally shows onboarding content
-    func showOnboardingIfNeeded<C: View>(
+    func showOnboardingIfNeeded(
         storage: AppStorage<Bool> = .onboarding,
         config: OnboardingConfiguration,
-        appIcon: Image,
-        continueAction: (() -> Void)? = nil,
-        @ViewBuilder dataPrivacyContent: @escaping () -> C
+        continueAction: (() -> Void)? = nil
     ) -> some View {
         modifier(
-            OnboardingModifier<C, EmptyView>(
+            OnboardingModifier<EmptyView>(
                 storage: storage,
                 config: config,
-                appIcon: appIcon,
                 continueAction: continueAction,
-                dataPrivacyContent: dataPrivacyContent,
                 flowContent: nil
             )
         )
@@ -88,8 +78,6 @@ public extension View {
     /// ContentView()
     ///     .showOnboardingIfNeeded(
     ///         config: config,
-    ///         appIcon: appIcon,
-    ///         dataPrivacyContent: { PrivacyView() },
     ///         flowContent: {
     ///             MyOnboardingSetupView(onFinish: { ... })
     ///         }
@@ -99,38 +87,30 @@ public extension View {
     /// - Parameters:
     ///   - storage: The AppStorage property for tracking completion state (defaults to `.onboarding`)
     ///   - config: Configuration for customizing the onboarding experience
-    ///   - appIcon: The app icon image to display in the onboarding
     ///   - continueAction: Optional custom action to perform when continuing (defaults to marking complete)
-    ///   - dataPrivacyContent: A view builder that provides the data privacy content
     ///   - flowContent: A view builder for displaying custom content after the welcome screen but before marking onboarding complete
     ///
     /// - Returns: A modified view that conditionally shows onboarding content followed by a custom flow
-    func showOnboardingIfNeeded<C: View, F: View>(
+    func showOnboardingIfNeeded<F: View>(
         storage: AppStorage<Bool> = .onboarding,
         config: OnboardingConfiguration,
-        appIcon: Image,
         continueAction: (() -> Void)? = nil,
-        @ViewBuilder dataPrivacyContent: @escaping () -> C,
         @ViewBuilder flowContent: @escaping () -> F
     ) -> some View {
         modifier(
-            OnboardingModifier<C, F>(
+            OnboardingModifier<F>(
                 storage: storage,
                 config: config,
-                appIcon: appIcon,
                 continueAction: continueAction,
-                dataPrivacyContent: dataPrivacyContent,
                 flowContent: flowContent
             )
         )
     }
 }
 
-struct OnboardingModifier<C: View, F: View> {
+struct OnboardingModifier<F: View> {
     private let config: OnboardingConfiguration
-    private let appIcon: Image
     private let continueAction: (() -> Void)?
-    private let dataPrivacyContent: () -> C
     private let flowContent: (() -> F)?
     @AppStorage private var isOnboardingCompleted: Bool
     @State private var isWelcomeScreenCompleted: Bool = false
@@ -138,16 +118,12 @@ struct OnboardingModifier<C: View, F: View> {
     init(
         storage: AppStorage<Bool>,
         config: OnboardingConfiguration,
-        appIcon: Image,
         continueAction: (() -> Void)?,
-        @ViewBuilder dataPrivacyContent: @escaping () -> C,
         flowContent: (() -> F)? = nil
     ) {
         self._isOnboardingCompleted = storage
         self.config = config
-        self.appIcon = appIcon
         self.continueAction = continueAction
-        self.dataPrivacyContent = dataPrivacyContent
         self.flowContent = flowContent
     }
 
@@ -185,10 +161,7 @@ private extension OnboardingModifier {
         switch config.welcomeScreen {
         case let .apple(configuration):
             AppleWelcomeScreen(
-                config: configuration,
-                appIcon: appIcon,
-                continueAction: handleContinue,
-                dataPrivacyContent: dataPrivacyContent
+                config: configuration.with(continueAction: handleContinue)
             )
         }
     }
@@ -199,11 +172,7 @@ private extension OnboardingModifier {
         Spacer()
     }
     .showOnboardingIfNeeded(
-        config: .mock,
-        appIcon: Image(.onboardingKitMockAppIcon),
-        dataPrivacyContent: {
-            Text("Privacy Policy Content")
-        }
+        config: .mock
     )
 }
 
@@ -213,10 +182,6 @@ private extension OnboardingModifier {
     }
     .showOnboardingIfNeeded(
         config: .mock,
-        appIcon: Image(.onboardingKitMockAppIcon),
-        dataPrivacyContent: {
-            Text("Privacy Policy Content")
-        },
         flowContent: {
             Text("Flow Content")
         }

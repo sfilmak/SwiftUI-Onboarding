@@ -79,6 +79,7 @@ extension OnboardingConfiguration {
     static let production = OnboardingConfiguration.apple(
         accentColor: .blue,
         appDisplayName: "My Amazing App",
+        appIcon: Image("AppIcon"),
         features: [
             FeatureInfo(
                 image: Image(systemName: "star.fill"),
@@ -96,6 +97,7 @@ extension OnboardingConfiguration {
                 content: "Optimized performance for the best user experience."
             )
         ],
+        privacyPolicyURL: URL(string: "https://example.com/privacy"),
         titleSectionAlignment: .center
     )
 }
@@ -112,11 +114,7 @@ struct MyApp: App {
         WindowGroup {
             ContentView()
                 .showOnboardingIfNeeded(
-                    config: .production,
-                    appIcon: Image("AppIcon"),
-                    dataPrivacyContent: {
-                        PrivacyPolicyView()
-                    }
+                    config: .production
                 )
         }
     }
@@ -132,14 +130,10 @@ You can provide a custom action to perform when the user taps "Continue":
 ContentView()
     .showOnboardingIfNeeded(
         config: .production,
-        appIcon: Image("AppIcon"),
         continueAction: {
             // Perform analytics, API calls, etc.
             Analytics.track("onboarding_completed")
             // Note: Onboarding completion is handled automatically
-        },
-        dataPrivacyContent: {
-            PrivacyPolicyView()
         }
     )
 ```
@@ -153,11 +147,7 @@ Use a custom AppStorage key for tracking onboarding state:
 ContentView()
     .showOnboardingIfNeeded(
         storage: $customOnboardingState,
-        config: .production,
-        appIcon: Image("AppIcon"),
-        dataPrivacyContent: {
-            PrivacyPolicyView()
-        }
+        config: .production
     )
 ```
 
@@ -193,11 +183,7 @@ struct MyApp: App {
         WindowGroup {
             ContentView()
                 .presentOnboardingIfNeeded(
-                    config: .production,
-                    appIcon: Image("AppIcon"),
-                    dataPrivacyContent: {
-                        PrivacyPolicyView()
-                    }
+                    config: .production
                 )
         }
     }
@@ -210,10 +196,6 @@ Need more than a single welcome screen? Both modifiers support a custom flow onc
 ```swift
 .showOnboardingIfNeeded(
     config: .production,
-    appIcon: Image("AppIcon"),
-    dataPrivacyContent: {
-        PrivacyPolicyView()
-    },
     flowContent: {
         CustomTutorialView(onFinish: { /* do something */ })
     }
@@ -226,16 +208,20 @@ Need more than a single welcome screen? Both modifiers support a custom flow onc
 
 - `welcomeScreen`: The welcome screen to present (see `WelcomeScreen`)
 - Convenience factory: `OnboardingConfiguration.apple(...)` produces the Apple-style welcome screen configuration you see in the examples.
+  - Required: `appIcon`, `appDisplayName`, `features`
+  - Optional: `accentColor`, `privacyPolicyURL`, `titleSectionAlignment`
 
 ### WelcomeScreen
 
-- `.apple(AppleWelcomeScreen.Configuration)`: Apple-style hero layout with feature list and continue/sign-in controls.
+- `.apple(AppleWelcomeScreen.Configuration)`: Apple-style hero layout with feature list and continue controls.
 
 ### AppleWelcomeScreen.Configuration
 
 - `accentColor`: Primary color used throughout the onboarding (default: `.blue`)
 - `appDisplayName`: Your app's display name shown in the welcome section
+- `appIcon`: The app icon image
 - `features`: Array of `FeatureInfo` objects to showcase
+- `privacyPolicyURL`: URL to open when the privacy text is tapped
 - `titleSectionAlignment`: Horizontal alignment for the title (`.leading`, `.center`, `.trailing`)
 
 ### FeatureInfo

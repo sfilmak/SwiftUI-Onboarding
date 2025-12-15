@@ -8,24 +8,24 @@
 import SwiftUI
 
 @MainActor
-struct BottomSection<C: View> {
+struct BottomSection {
     private let accentColor: Color
     private let appDisplayName: String
+    private let privacyPolicyURL: URL?
     private let continueAction: () -> Void
-    private let dataPrivacyContent: () -> C
-    @State private var isDataPrivacyPresented: Bool = false
     @State private var isAnimating: Bool = false
+    @Environment(\.openURL) private var openURL
 
     init(
         accentColor: Color,
         appDisplayName: String,
-        continueAction: @escaping () -> Void,
-        @ViewBuilder dataPrivacyContent: @escaping () -> C
+        privacyPolicyURL: URL?,
+        continueAction: @escaping () -> Void
     ) {
         self.accentColor = accentColor
         self.appDisplayName = appDisplayName
+        self.privacyPolicyURL = privacyPolicyURL
         self.continueAction = continueAction
-        self.dataPrivacyContent = dataPrivacyContent
     }
 
     private func onAppear() {
@@ -35,7 +35,8 @@ struct BottomSection<C: View> {
     }
 
     private func disclosureAction() {
-        isDataPrivacyPresented.toggle()
+        guard let privacyPolicyURL else { return }
+        openURL(privacyPolicyURL)
     }
 }
 
@@ -53,16 +54,6 @@ extension BottomSection: View {
         .mask(opacityLinearGradient)
         .opacity(isAnimating ? 1 : 0)
         .onAppear(perform: onAppear)
-        .styledSheet(
-            isPresented: $isDataPrivacyPresented,
-            content: dataPrivacySheet
-        )
-    }
-
-    private func dataPrivacySheet() -> some View {
-        NavigationStack {
-            dataPrivacyContent()
-        }
     }
 
     private var dataPrivacyImage: some View {
@@ -73,23 +64,24 @@ extension BottomSection: View {
     }
 
     private var disclosureText: some View {
-        Group {
-            Text(verbatim: appDisplayName)
-                .foregroundStyle(.secondary) +
-            Text(.privacyDataCollection, bundle: .module)
-                .foregroundStyle(.secondary) +
-            Text(.privacyDataManagement, bundle: .module)
-                .foregroundStyle(accentColor)
-                .bold()
+        Button(action: disclosureAction) {
+            Group {
+                Text(verbatim: appDisplayName)
+                    .foregroundStyle(.secondary) +
+                Text(.privacyDataCollection, bundle: .module)
+                    .foregroundStyle(.secondary) +
+                Text(.privacyDataManagement, bundle: .module)
+                    .foregroundStyle(accentColor)
+                    .bold()
+            }
+            .multilineTextAlignment(.center)
+            .font(.caption)
+            .padding(.bottom, 24)
+            .padding(.top, 6)
         }
-        .multilineTextAlignment(.center)
-        .font(.caption)
-        .padding(.bottom, 24)
-        .padding(.top, 6)
-        .onTapGesture(perform: disclosureAction)
+        .disabled(privacyPolicyURL == nil)
     }
 
-    @ViewBuilder
     private var continueButton: some View {
         Button(
             action: continueAction,
@@ -124,11 +116,9 @@ extension BottomSection: View {
         BottomSection(
             accentColor: .blue,
             appDisplayName: .init("Test App"),
+            privacyPolicyURL: URL(string: "https://example.com/privacy"),
             continueAction: {
                 print("Continue Tapped")
-            },
-            dataPrivacyContent: {
-                Text("Privacy Policy Content")
             }
         )
     }
