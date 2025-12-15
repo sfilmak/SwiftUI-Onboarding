@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.1.2] - 2025-07-04
 
 ### Added
-- `StyledSheet` now adds a dismiss button to the Data Privacy screen when presented in a sheet.
+- `StyledSheet` now adds a dismiss button to the Data Privacy screen when presented in a sheet. *(Deprecated/removed in 3.x refactors.)*
 
 ## [2.1.1] - 2025-07-03
 
