@@ -9,13 +9,13 @@ import SwiftUI
 
 @MainActor
 struct TitleSection {
-    private let config: OnboardingConfiguration
+    private let config: AppleWelcomeScreen.Configuration
     private let appIcon: Image
     private let shouldHideAppIcon: Bool
     @State private var isAnimating = false
 
     init(
-        config: OnboardingConfiguration,
+        config: AppleWelcomeScreen.Configuration,
         appIcon: Image,
         shouldHideAppIcon: Bool
     ) {

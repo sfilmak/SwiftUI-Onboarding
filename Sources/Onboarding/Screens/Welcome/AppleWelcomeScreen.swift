@@ -1,5 +1,5 @@
 //
-//  WelcomeScreen.swift
+//  AppleWelcomeScreen.swift
 //
 //  Created by James Sedlacek on 12/30/23.
 //
@@ -7,16 +7,35 @@
 import SwiftUI
 
 @MainActor
-public struct WelcomeScreen<C: View> {
-    private let config: OnboardingConfiguration
+public struct AppleWelcomeScreen {
+    public struct Configuration {
+        public let accentColor: Color
+        public let appDisplayName: String
+        public let features: [FeatureInfo]
+        public let titleSectionAlignment: HorizontalAlignment
+
+        public init(
+            accentColor: Color = .blue,
+            appDisplayName: String,
+            features: [FeatureInfo],
+            titleSectionAlignment: HorizontalAlignment = .leading
+        ) {
+            self.accentColor = accentColor
+            self.appDisplayName = appDisplayName
+            self.features = features
+            self.titleSectionAlignment = titleSectionAlignment
+        }
+    }
+
+    private let config: Configuration
     private let appIcon: Image
     private let continueAction: () -> Void
-    private let dataPrivacyContent: () -> C
+    private let dataPrivacyContent: () -> AnyView
     private let signInWithAppleConfiguration: SignInWithAppleButtonConfiguration?
     @State private var isAnimating = false
 
-    public init(
-        config: OnboardingConfiguration,
+    public init<C: View>(
+        config: Configuration,
         appIcon: Image,
         continueAction: @escaping () -> Void,
         @ViewBuilder dataPrivacyContent: @escaping () -> C,
@@ -25,7 +44,7 @@ public struct WelcomeScreen<C: View> {
         self.config = config
         self.appIcon = appIcon
         self.continueAction = continueAction
-        self.dataPrivacyContent = dataPrivacyContent
+        self.dataPrivacyContent = { AnyView(dataPrivacyContent()) }
         self.signInWithAppleConfiguration = signInWithAppleConfiguration
     }
 
@@ -37,7 +56,15 @@ public struct WelcomeScreen<C: View> {
 }
 
 @MainActor
-extension WelcomeScreen: View {
+public extension AppleWelcomeScreen.Configuration {
+    static let mock = Self(
+        appDisplayName: .init("Onboarding"),
+        features: [.mock, .mock2, .mock3, .mock4, .mock5, .mock6]
+    )
+}
+
+@MainActor
+extension AppleWelcomeScreen: View {
     public var body: some View {
         ScrollView {
             VStack(alignment: .center, spacing: 40) {
@@ -82,7 +109,7 @@ extension WelcomeScreen: View {
 }
 
 #Preview("Default") {
-    WelcomeScreen(
+    AppleWelcomeScreen(
         config: .mock,
         appIcon: Image(.onboardingKitMockAppIcon),
         continueAction: {
@@ -95,7 +122,7 @@ extension WelcomeScreen: View {
 }
 
 #Preview("Sign in with Apple") {
-    WelcomeScreen(
+    AppleWelcomeScreen(
         config: .mock,
         appIcon: Image(.onboardingKitMockAppIcon),
         continueAction: {

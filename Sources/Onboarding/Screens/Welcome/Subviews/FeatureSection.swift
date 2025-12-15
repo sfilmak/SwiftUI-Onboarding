@@ -9,10 +9,10 @@ import SwiftUI
 
 @MainActor
 struct FeatureSection: View {
-    private let config: OnboardingConfiguration
+    private let config: AppleWelcomeScreen.Configuration
     @State private var isAnimating: [Bool] = []
 
-    init(config: OnboardingConfiguration) {
+    init(config: AppleWelcomeScreen.Configuration) {
         self.config = config
         _isAnimating = .init(
             initialValue: Array(

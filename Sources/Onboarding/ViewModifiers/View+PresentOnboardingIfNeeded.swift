@@ -188,14 +188,25 @@ extension OnboardingSheetModifier: ViewModifier {
         if let flowContent, isWelcomeScreenCompleted {
             flowContent()
         } else {
-            WelcomeScreen(
-                config: config,
+            welcomeScreen()
+                .interactiveDismissDisabled(true)
+        }
+    }
+}
+
+@MainActor
+private extension OnboardingSheetModifier {
+    @ViewBuilder
+    func welcomeScreen() -> some View {
+        switch config.welcomeScreen {
+        case let .apple(configuration):
+            AppleWelcomeScreen(
+                config: configuration,
                 appIcon: appIcon,
                 continueAction: handleContinue,
                 dataPrivacyContent: dataPrivacyContent,
                 signInWithAppleConfiguration: signInWithAppleConfiguration
             )
-            .interactiveDismissDisabled(true)
         }
     }
 }

@@ -23,7 +23,7 @@ public extension View {
     /// ```swift
     /// ContentView()
     ///     .showOnboardingIfNeeded(
-    ///         config: OnboardingConfiguration(
+    ///         config: OnboardingConfiguration.apple(
     ///             appDisplayName: "My App",
     ///             features: myFeatures
     ///         ),
@@ -233,8 +233,19 @@ extension OnboardingModifier: ViewModifier {
         } else if let flowContent, isWelcomeScreenCompleted {
             flowContent()
         } else {
-            WelcomeScreen(
-                config: config,
+            welcomeScreen()
+        }
+    }
+}
+
+@MainActor
+private extension OnboardingModifier {
+    @ViewBuilder
+    func welcomeScreen() -> some View {
+        switch config.welcomeScreen {
+        case let .apple(configuration):
+            AppleWelcomeScreen(
+                config: configuration,
                 appIcon: appIcon,
                 continueAction: continueAction,
                 dataPrivacyContent: dataPrivacyContent,

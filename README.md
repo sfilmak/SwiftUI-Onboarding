@@ -76,7 +76,7 @@ import Onboarding
 import SwiftUI
 
 extension OnboardingConfiguration {
-    static let production = OnboardingConfiguration(
+    static let production = OnboardingConfiguration.apple(
         accentColor: .blue,
         appDisplayName: "My Amazing App",
         features: [
@@ -224,6 +224,15 @@ Need more than a single welcome screen? Both modifiers support a custom flow onc
 
 ### OnboardingConfiguration
 
+- `welcomeScreen`: The welcome screen to present (see `WelcomeScreen`)
+- Convenience factory: `OnboardingConfiguration.apple(...)` produces the Apple-style welcome screen configuration you see in the examples.
+
+### WelcomeScreen
+
+- `.apple(AppleWelcomeScreen.Configuration)`: Apple-style hero layout with feature list and continue/sign-in controls.
+
+### AppleWelcomeScreen.Configuration
+
 - `accentColor`: Primary color used throughout the onboarding (default: `.blue`)
 - `appDisplayName`: Your app's display name shown in the welcome section
 - `features`: Array of `FeatureInfo` objects to showcase
@@ -234,6 +243,10 @@ Need more than a single welcome screen? Both modifiers support a custom flow onc
 - `image`: Icon representing the feature (typically SF Symbols)
 - `title`: Brief, descriptive title
 - `content`: Detailed description of the feature
+
+### Migration Note
+
+The initializer `OnboardingConfiguration(accentColor:appDisplayName:features:titleSectionAlignment:)` has been replaced by `OnboardingConfiguration(welcomeScreen:)`. Use the new factory `OnboardingConfiguration.apple(...)` to recreate the previous behavior with minimal changes.
 
 ## Contributing
 
