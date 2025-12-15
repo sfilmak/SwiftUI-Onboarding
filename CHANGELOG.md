@@ -50,7 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **BREAKING**: Now requires Swift 6, iOS 18+, and macOS 15+ minimum.
-- **BREAKING**: `OnboardingConfiguration` has changed—please update your usage accordingly.
+- **BREAKING**: `OnboardingConfiguration` was removed in favor of passing `WelcomeScreen` directly.
 - **BREAKING**: You now provide your app's display name explicitly.
 - **BREAKING**: Data privacy is specified as a SwiftUI view.
 

@@ -23,7 +23,7 @@ public extension View {
     /// ```swift
     /// ContentView()
     ///     .showOnboardingIfNeeded(
-    ///         config: OnboardingConfiguration.apple(
+    ///         welcomeScreen: WelcomeScreen.apple(
     ///             appDisplayName: "My App",
     ///             appIcon: Image("AppIcon"),
     ///             privacyPolicyURL: URL(string: "https://example.com/privacy"),
@@ -37,7 +37,7 @@ public extension View {
     /// ```swift
     /// ContentView()
     ///     .showOnboardingIfNeeded(
-    ///         config: config,
+    ///         welcomeScreen: welcomeScreen,
     ///         continueAction: {
     ///             // Custom logic before marking as complete
     ///             analytics.track("onboarding_completed")
@@ -48,19 +48,19 @@ public extension View {
     ///
     /// - Parameters:
     ///   - storage: The AppStorage property for tracking completion state (defaults to `.onboarding`)
-    ///   - config: Configuration for customizing the onboarding experience
+    ///   - welcomeScreen: The welcome screen to present
     ///   - continueAction: Optional custom action to perform when continuing (defaults to marking complete)
     ///
     /// - Returns: A modified view that conditionally shows onboarding content
     func showOnboardingIfNeeded(
         storage: AppStorage<Bool> = .onboarding,
-        config: OnboardingConfiguration,
+        welcomeScreen: WelcomeScreen,
         continueAction: (() -> Void)? = nil
     ) -> some View {
         modifier(
             OnboardingModifier<EmptyView>(
                 storage: storage,
-                config: config,
+                welcomeScreen: welcomeScreen,
                 continueAction: continueAction,
                 flowContent: nil
             )
@@ -77,7 +77,7 @@ public extension View {
     /// ```swift
     /// ContentView()
     ///     .showOnboardingIfNeeded(
-    ///         config: config,
+    ///         welcomeScreen: welcomeScreen,
     ///         flowContent: {
     ///             MyOnboardingSetupView(onFinish: { ... })
     ///         }
@@ -86,21 +86,21 @@ public extension View {
     ///
     /// - Parameters:
     ///   - storage: The AppStorage property for tracking completion state (defaults to `.onboarding`)
-    ///   - config: Configuration for customizing the onboarding experience
+    ///   - welcomeScreen: The welcome screen to present
     ///   - continueAction: Optional custom action to perform when continuing (defaults to marking complete)
     ///   - flowContent: A view builder for displaying custom content after the welcome screen but before marking onboarding complete
     ///
     /// - Returns: A modified view that conditionally shows onboarding content followed by a custom flow
     func showOnboardingIfNeeded<F: View>(
         storage: AppStorage<Bool> = .onboarding,
-        config: OnboardingConfiguration,
+        welcomeScreen: WelcomeScreen,
         continueAction: (() -> Void)? = nil,
         @ViewBuilder flowContent: @escaping () -> F
     ) -> some View {
         modifier(
             OnboardingModifier<F>(
                 storage: storage,
-                config: config,
+                welcomeScreen: welcomeScreen,
                 continueAction: continueAction,
                 flowContent: flowContent
             )
@@ -109,7 +109,7 @@ public extension View {
 }
 
 struct OnboardingModifier<F: View> {
-    private let config: OnboardingConfiguration
+    private let welcomeScreen: WelcomeScreen
     private let continueAction: (() -> Void)?
     private let flowContent: (() -> F)?
     @AppStorage private var isOnboardingCompleted: Bool
@@ -117,12 +117,12 @@ struct OnboardingModifier<F: View> {
 
     init(
         storage: AppStorage<Bool>,
-        config: OnboardingConfiguration,
+        welcomeScreen: WelcomeScreen,
         continueAction: (() -> Void)?,
         flowContent: (() -> F)? = nil
     ) {
         self._isOnboardingCompleted = storage
-        self.config = config
+        self.welcomeScreen = welcomeScreen
         self.continueAction = continueAction
         self.flowContent = flowContent
     }
@@ -149,7 +149,7 @@ extension OnboardingModifier: ViewModifier {
         } else if let flowContent, isWelcomeScreenCompleted {
             flowContent()
         } else {
-            welcomeScreen()
+            welcomeScreenView()
         }
     }
 }
@@ -157,12 +157,11 @@ extension OnboardingModifier: ViewModifier {
 @MainActor
 private extension OnboardingModifier {
     @ViewBuilder
-    func welcomeScreen() -> some View {
-        switch config.welcomeScreen {
+    func welcomeScreenView() -> some View {
+        let screen = welcomeScreen.with(continueAction: handleContinue)
+        switch screen {
         case let .apple(configuration):
-            AppleWelcomeScreen(
-                config: configuration.with(continueAction: handleContinue)
-            )
+            AppleWelcomeScreen(config: configuration)
         }
     }
 }
@@ -172,7 +171,7 @@ private extension OnboardingModifier {
         Spacer()
     }
     .showOnboardingIfNeeded(
-        config: .mock
+        welcomeScreen: .mock
     )
 }
 
@@ -181,7 +180,7 @@ private extension OnboardingModifier {
         Spacer()
     }
     .showOnboardingIfNeeded(
-        config: .mock,
+        welcomeScreen: .mock,
         flowContent: {
             Text("Flow Content")
         }

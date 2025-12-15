@@ -75,8 +75,8 @@ Onboarding includes localization for the following languages:
 import Onboarding
 import SwiftUI
 
-extension OnboardingConfiguration {
-    static let production = OnboardingConfiguration.apple(
+extension WelcomeScreen {
+    static let production = WelcomeScreen.apple(
         accentColor: .blue,
         appDisplayName: "My Amazing App",
         appIcon: Image("AppIcon"),
@@ -114,7 +114,7 @@ struct MyApp: App {
         WindowGroup {
             ContentView()
                 .showOnboardingIfNeeded(
-                    config: .production
+                    welcomeScreen: .production
                 )
         }
     }
@@ -129,7 +129,7 @@ You can provide a custom action to perform when the user taps "Continue":
 ```swift
 ContentView()
     .showOnboardingIfNeeded(
-        config: .production,
+        welcomeScreen: .production,
         continueAction: {
             // Perform analytics, API calls, etc.
             Analytics.track("onboarding_completed")
@@ -147,7 +147,7 @@ Use a custom AppStorage key for tracking onboarding state:
 ContentView()
     .showOnboardingIfNeeded(
         storage: $customOnboardingState,
-        config: .production
+        welcomeScreen: .production
     )
 ```
 
@@ -183,7 +183,7 @@ struct MyApp: App {
         WindowGroup {
             ContentView()
                 .presentOnboardingIfNeeded(
-                    config: .production
+                    welcomeScreen: .production
                 )
         }
     }
@@ -195,7 +195,7 @@ struct MyApp: App {
 Need more than a single welcome screen? Both modifiers support a custom flow once the initial onboarding is completed, allowing you to show setup, permissions, or tutorials before marking onboarding as complete.
 ```swift
 .showOnboardingIfNeeded(
-    config: .production,
+    welcomeScreen: .production,
     flowContent: {
         CustomTutorialView(onFinish: { /* do something */ })
     }
@@ -204,16 +204,12 @@ Need more than a single welcome screen? Both modifiers support a custom flow onc
 
 ## Configuration Options
 
-### OnboardingConfiguration
-
-- `welcomeScreen`: The welcome screen to present (see `WelcomeScreen`)
-- Convenience factory: `OnboardingConfiguration.apple(...)` produces the Apple-style welcome screen configuration you see in the examples.
-  - Required: `appIcon`, `appDisplayName`, `features`
-  - Optional: `accentColor`, `privacyPolicyURL`, `titleSectionAlignment`
-
 ### WelcomeScreen
 
 - `.apple(AppleWelcomeScreen.Configuration)`: Apple-style hero layout with feature list and continue controls.
+  - Convenience factory: `WelcomeScreen.apple(...)` produces the Apple-style welcome screen configuration you see in the examples.
+  - Required: `appIcon`, `appDisplayName`, `features`
+  - Optional: `accentColor`, `privacyPolicyURL`, `titleSectionAlignment`
 
 ### AppleWelcomeScreen.Configuration
 
@@ -229,10 +225,6 @@ Need more than a single welcome screen? Both modifiers support a custom flow onc
 - `image`: Icon representing the feature (typically SF Symbols)
 - `title`: Brief, descriptive title
 - `content`: Detailed description of the feature
-
-### Migration Note
-
-The initializer `OnboardingConfiguration(accentColor:appDisplayName:features:titleSectionAlignment:)` has been replaced by `OnboardingConfiguration(welcomeScreen:)`. Use the new factory `OnboardingConfiguration.apple(...)` to recreate the previous behavior with minimal changes.
 
 ## Contributing
 

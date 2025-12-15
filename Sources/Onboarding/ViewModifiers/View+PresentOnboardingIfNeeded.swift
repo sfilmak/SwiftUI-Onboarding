@@ -15,19 +15,19 @@ public extension View {
     ///
     /// - Parameters:
     ///   - storage: The AppStorage property for tracking completion state (defaults to `.onboarding`)
-    ///   - config: Configuration for customizing the onboarding experience
+    ///   - welcomeScreen: The welcome screen to present
     ///   - continueAction: Optional custom action to perform when continuing (defaults to marking complete)
     ///
     /// - Returns: A view that presents onboarding in a sheet when needed
     func presentOnboardingIfNeeded(
         storage: AppStorage<Bool> = .onboarding,
-        config: OnboardingConfiguration,
+        welcomeScreen: WelcomeScreen,
         continueAction: (() -> Void)? = nil
     ) -> some View {
         modifier(
             OnboardingSheetModifier<EmptyView>(
                 storage: storage,
-                config: config,
+                welcomeScreen: welcomeScreen,
                 continueAction: continueAction,
                 flowContent: nil
             )
@@ -40,14 +40,14 @@ public extension View {
     ///   - flowContent: A view builder for additional steps after the welcome screen.
     func presentOnboardingIfNeeded<F: View>(
         storage: AppStorage<Bool> = .onboarding,
-        config: OnboardingConfiguration,
+        welcomeScreen: WelcomeScreen,
         continueAction: (() -> Void)? = nil,
         @ViewBuilder flowContent: @escaping () -> F
     ) -> some View {
         modifier(
             OnboardingSheetModifier<F>(
                 storage: storage,
-                config: config,
+                welcomeScreen: welcomeScreen,
                 continueAction: continueAction,
                 flowContent: flowContent
             )
@@ -57,7 +57,7 @@ public extension View {
 
 @MainActor
 private struct OnboardingSheetModifier<F: View> {
-    private let config: OnboardingConfiguration
+    private let welcomeScreen: WelcomeScreen
     private let continueAction: (() -> Void)?
     private let flowContent: (() -> F)?
     @AppStorage private var isOnboardingCompleted: Bool
@@ -65,12 +65,12 @@ private struct OnboardingSheetModifier<F: View> {
 
     init(
         storage: AppStorage<Bool>,
-        config: OnboardingConfiguration,
+        welcomeScreen: WelcomeScreen,
         continueAction: (() -> Void)?,
         flowContent: (() -> F)? = nil
     ) {
         self._isOnboardingCompleted = storage
-        self.config = config
+        self.welcomeScreen = welcomeScreen
         self.continueAction = continueAction
         self.flowContent = flowContent
     }
@@ -109,7 +109,7 @@ extension OnboardingSheetModifier: ViewModifier {
         if let flowContent, isWelcomeScreenCompleted {
             flowContent()
         } else {
-            welcomeScreen()
+            welcomeScreenView()
                 .interactiveDismissDisabled(true)
         }
     }
@@ -118,12 +118,11 @@ extension OnboardingSheetModifier: ViewModifier {
 @MainActor
 private extension OnboardingSheetModifier {
     @ViewBuilder
-    func welcomeScreen() -> some View {
-        switch config.welcomeScreen {
+    func welcomeScreenView() -> some View {
+        let screen = welcomeScreen.with(continueAction: handleContinue)
+        switch screen {
         case let .apple(configuration):
-            AppleWelcomeScreen(
-                config: configuration.with(continueAction: handleContinue)
-            )
+            AppleWelcomeScreen(config: configuration)
         }
     }
 }
@@ -132,7 +131,9 @@ private extension OnboardingSheetModifier {
     VStack {
         Spacer()
     }
-    .presentOnboardingIfNeeded(config: .mock)
+    .presentOnboardingIfNeeded(
+        welcomeScreen: .mock
+    )
 }
 
 #Preview("Welcome Screen with Flow") {
@@ -140,7 +141,7 @@ private extension OnboardingSheetModifier {
         Spacer()
     }
     .presentOnboardingIfNeeded(
-        config: .mock,
+        welcomeScreen: .mock,
         flowContent: {
             Text("Flow Content")
         }
