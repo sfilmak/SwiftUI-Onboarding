@@ -193,6 +193,28 @@ struct MyApp: App {
 }
 ```
 
+#### Modern Welcome Screen
+
+Use the modern layout with feature cards and inline terms/privacy links:
+```swift
+let modern = WelcomeScreen.modern(
+    accentColor: .mint,
+    appDisplayName: "My Amazing App",
+    appIcon: Image("AppIcon"),
+    features: [
+        FeatureInfo(image: Image(systemName: "bolt.fill"), title: "Fast", content: "Optimized for speed."),
+        FeatureInfo(image: Image(systemName: "shield.fill"), title: "Secure", content: "Your data stays private.")
+    ],
+    termsOfServiceURL: URL(string: "https://example.com/terms")!,
+    privacyPolicyURL: URL(string: "https://example.com/privacy")!
+)
+
+ContentView()
+    .showOnboardingIfNeeded { markComplete in
+        modern.with(continueAction: markComplete)
+    }
+```
+
 #### Multi-Screen Onboarding Flows
 
 Need more than a single welcome screen? Build whatever flow you need inside the onboarding builder and call `markComplete()` when you're done.
@@ -212,6 +234,9 @@ Need more than a single welcome screen? Build whatever flow you need inside the 
   - Convenience factory: `WelcomeScreen.apple(...)` produces the Apple-style welcome screen configuration you see in the examples.
   - Required: `appIcon`, `appDisplayName`, `features`
   - Optional: `accentColor`, `privacyPolicyURL`, `titleSectionAlignment`
+- `.modern(ModernWelcomeScreen.Configuration)`: Card-based feature layout with inline terms/privacy links.
+  - Required: `appIcon`, `appDisplayName`, `features`, `termsOfServiceURL`, `privacyPolicyURL`
+  - Optional: `accentColor`
 
 ### AppleWelcomeScreen.Configuration
 
