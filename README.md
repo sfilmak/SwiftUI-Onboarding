@@ -236,7 +236,7 @@ Need more than a single welcome screen? Build whatever flow you need inside the 
   - Optional: `accentColor`, `privacyPolicyURL`, `titleSectionAlignment`
 - `.modern(ModernWelcomeScreen.Configuration)`: Card-based feature layout with inline terms/privacy links.
   - Required: `appIcon`, `appDisplayName`, `features`, `termsOfServiceURL`, `privacyPolicyURL`
-  - Optional: `accentColor`
+  - Optional: `accentColor`, `titleSectionAlignment`
 
 ### AppleWelcomeScreen.Configuration
 

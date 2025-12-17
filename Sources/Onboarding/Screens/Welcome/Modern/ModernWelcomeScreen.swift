@@ -6,8 +6,10 @@
 
 import SwiftUI
 
+/// Card-based welcome layout with inline terms/privacy links.
 @MainActor
 public struct ModernWelcomeScreen {
+    /// Configuration for the modern welcome screen.
     public struct Configuration {
         public let accentColor: Color
         public let appDisplayName: String
