@@ -100,7 +100,7 @@ extension ModernWelcomeScreen: View {
     private var titleSection: some View {
         ModernTitleSection(
             config: config,
-            isAppIconHidden: !isAnimating
+            shouldShowAppIcon: !isAnimating
         )
         .offset(y: isAnimating ? 0 : 200)
     }

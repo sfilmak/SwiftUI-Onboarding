@@ -10,15 +10,15 @@ import SwiftUI
 @MainActor
 struct AppleTitleSection {
     private let config: AppleWelcomeScreen.Configuration
-    private let isAppIconHidden: Bool
+    private let shouldShowAppIcon: Bool
     @State private var isAnimating = false
 
     init(
         config: AppleWelcomeScreen.Configuration,
-        isAppIconHidden: Bool
+        shouldShowAppIcon: Bool
     ) {
         self.config = config
-        self.isAppIconHidden = isAppIconHidden
+        self.shouldShowAppIcon = shouldShowAppIcon
     }
 
     private func onAppear() {
@@ -50,7 +50,7 @@ extension AppleTitleSection: View {
 
     @ViewBuilder
     private var appIconView: some View {
-        if isAppIconHidden {
+        if shouldShowAppIcon {
             config.appIcon
                 .resizable()
                 .frame(width: 60, height: 60)
@@ -75,6 +75,6 @@ extension AppleTitleSection: View {
 #Preview {
     AppleTitleSection(
         config: .mock,
-        isAppIconHidden: true
+        shouldShowAppIcon: true
     )
 }
