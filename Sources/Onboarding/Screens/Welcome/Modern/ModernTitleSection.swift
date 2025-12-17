@@ -9,15 +9,15 @@ import SwiftUI
 @MainActor
 struct ModernTitleSection {
     private let config: ModernWelcomeScreen.Configuration
-    private let shouldHideAppIcon: Bool
+    private let isAppIconHidden: Bool
     @State private var isAnimating = false
 
     init(
         config: ModernWelcomeScreen.Configuration,
-        shouldHideAppIcon: Bool
+        isAppIconHidden: Bool
     ) {
         self.config = config
-        self.shouldHideAppIcon = shouldHideAppIcon
+        self.isAppIconHidden = isAppIconHidden
     }
 
     private func onAppear() {
@@ -49,7 +49,7 @@ extension ModernTitleSection: View {
 
     @ViewBuilder
     private var appIconView: some View {
-        if shouldHideAppIcon {
+        if isAppIconHidden {
             config.appIcon
                 .resizable()
                 .frame(width: 60, height: 60)
@@ -60,7 +60,7 @@ extension ModernTitleSection: View {
 
     private var welcomeToText: some View {
         Text(.onboardingWelcomeTo, bundle: .module)
-            .foregroundColor(.primary)
+            .foregroundStyle(.primary)
             .fontWeight(.semibold)
     }
 
@@ -74,6 +74,6 @@ extension ModernTitleSection: View {
 #Preview {
     ModernTitleSection(
         config: .mock,
-        shouldHideAppIcon: true
+        isAppIconHidden: true
     )
 }

@@ -64,22 +64,20 @@ extension AppleBottomSection: View {
     }
 
     private var disclosureText: some View {
-        Button(action: disclosureAction) {
-            Group {
-                Text(verbatim: appDisplayName)
-                    .foregroundStyle(.secondary) +
-                Text(.privacyDataCollection, bundle: .module)
-                    .foregroundStyle(.secondary) +
-                Text(.privacyDataManagement, bundle: .module)
-                    .foregroundStyle(accentColor)
-                    .bold()
-            }
-            .multilineTextAlignment(.center)
-            .font(.caption)
-            .padding(.bottom, 24)
-            .padding(.top, 6)
+        Group {
+            Text(verbatim: appDisplayName)
+                .foregroundStyle(.secondary) +
+            Text(.privacyDataCollection, bundle: .module)
+                .foregroundStyle(.secondary) +
+            Text(.privacyDataManagement, bundle: .module)
+                .foregroundStyle(accentColor)
+                .bold()
         }
-        .disabled(privacyPolicyURL == nil)
+        .multilineTextAlignment(.center)
+        .font(.caption)
+        .padding(.bottom, 24)
+        .padding(.top, 6)
+        .onTapGesture(perform: disclosureAction)
     }
 
     private var continueButton: some View {

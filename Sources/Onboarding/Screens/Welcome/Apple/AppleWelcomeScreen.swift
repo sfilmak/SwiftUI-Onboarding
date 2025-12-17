@@ -94,7 +94,7 @@ extension AppleWelcomeScreen: View {
     private var titleSection: some View {
         AppleTitleSection(
             config: config,
-            shouldHideAppIcon: !isAnimating
+            isAppIconHidden: !isAnimating
         )
         .offset(y: isAnimating ? 0 : 200)
     }

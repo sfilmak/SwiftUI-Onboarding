@@ -24,8 +24,9 @@ struct ModernBottomSection {
 @MainActor
 extension ModernBottomSection: View {
     var body: some View {
-        VStack(alignment: .center, spacing: 16) {
+        VStack(alignment: .center, spacing: 20) {
             ModernDisclaimerSection(
+                accentColor: accentColor,
                 termsOfServiceURL: termsOfServiceURL,
                 privacyPolicyURL: privacyPolicyURL
             )
@@ -40,7 +41,7 @@ extension ModernBottomSection: View {
             .tint(accentColor)
         }
         .padding(20)
-        .background(.background.tertiary)
+        .background(.background.secondary)
         .opacity(isAnimating ? 1 : 0)
         .onAppear(perform: onAppear)
     }

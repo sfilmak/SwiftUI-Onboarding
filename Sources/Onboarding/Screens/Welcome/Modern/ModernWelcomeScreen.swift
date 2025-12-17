@@ -90,6 +90,7 @@ extension ModernWelcomeScreen: View {
         }
         .scrollIndicators(.hidden)
         .safeAreaInset(edge: .bottom, content: bottomSection)
+        .background(.background.secondary)
         .onAppear(perform: onAppear)
         .dynamicTypeSize(.xSmall ... .xxxLarge)
     }
@@ -97,7 +98,7 @@ extension ModernWelcomeScreen: View {
     private var titleSection: some View {
         ModernTitleSection(
             config: config,
-            shouldHideAppIcon: !isAnimating
+            isAppIconHidden: !isAnimating
         )
         .offset(y: isAnimating ? 0 : 200)
     }
