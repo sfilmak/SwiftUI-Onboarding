@@ -18,8 +18,10 @@ public extension PermissionsScreen {
         title: LocalizedStringKey = .notificationsTitleDefault,
         subtitle: LocalizedStringKey,
         appIcon: Image? = nil,
+        authorizationOptions: UNAuthorizationOptions = [.alert, .badge, .sound],
         allowAction: @escaping () -> Void = {},
         skipAction: (() -> Void)? = nil,
+        failureAction: ((_ granted: Bool, _ error: Error?) -> Void)? = nil,
         bundle: Bundle? = nil
     ) -> Self {
         .notifications(
@@ -28,8 +30,10 @@ public extension PermissionsScreen {
                 title: title,
                 subtitle: subtitle,
                 appIcon: appIcon,
+                authorizationOptions: authorizationOptions,
                 allowAction: allowAction,
                 skipAction: skipAction,
+                failureAction: failureAction,
                 bundle: bundle
             )
         )
@@ -37,14 +41,16 @@ public extension PermissionsScreen {
 
     func with(
         allowAction: @escaping () -> Void,
-        skipAction: (() -> Void)? = nil
+        skipAction: (() -> Void)? = nil,
+        failureAction: ((_ granted: Bool, _ error: Error?) -> Void)? = nil
     ) -> Self {
         switch self {
         case let .notifications(configuration):
             return .notifications(
                 configuration.with(
                     allowAction: allowAction,
-                    skipAction: skipAction
+                    skipAction: skipAction,
+                    failureAction: failureAction
                 )
             )
         }

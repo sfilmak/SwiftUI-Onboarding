@@ -5,6 +5,7 @@
 //
 
 import SwiftUI
+import UserNotifications
 
 /// A focused priming screen to encourage enabling push notifications.
 @MainActor
@@ -22,8 +23,10 @@ public struct NotificationsPriming {
         public let allowButtonTitle: LocalizedStringKey
         public let skipButtonTitle: LocalizedStringKey?
         public let appIcon: Image?
+        public let authorizationOptions: UNAuthorizationOptions
         public let allowAction: () -> Void
         public let skipAction: (() -> Void)?
+        public let failureAction: ((_ granted: Bool, _ error: Error?) -> Void)?
         public let bundle: Bundle?
 
         public init(
@@ -37,8 +40,10 @@ public struct NotificationsPriming {
             allowButtonTitle: LocalizedStringKey = .notificationsAllowButton,
             skipButtonTitle: LocalizedStringKey? = .notificationsSkipButton,
             appIcon: Image? = nil,
+            authorizationOptions: UNAuthorizationOptions = [.alert, .badge, .sound],
             allowAction: @escaping () -> Void = {},
             skipAction: (() -> Void)? = {},
+            failureAction: ((_ granted: Bool, _ error: Error?) -> Void)? = nil,
             bundle: Bundle?
         ) {
             self.accentColor = accentColor
@@ -51,14 +56,17 @@ public struct NotificationsPriming {
             self.allowButtonTitle = allowButtonTitle
             self.skipButtonTitle = skipButtonTitle
             self.appIcon = appIcon
+            self.authorizationOptions = authorizationOptions
             self.allowAction = allowAction
             self.skipAction = skipAction
+            self.failureAction = failureAction
             self.bundle = bundle
         }
 
         func with(
             allowAction: @escaping () -> Void,
-            skipAction: (() -> Void)? = nil
+            skipAction: (() -> Void)? = nil,
+            failureAction: ((_ granted: Bool, _ error: Error?) -> Void)? = nil
         ) -> Self {
             .init(
                 accentColor: accentColor,
@@ -71,8 +79,10 @@ public struct NotificationsPriming {
                 allowButtonTitle: allowButtonTitle,
                 skipButtonTitle: skipButtonTitle,
                 appIcon: appIcon,
+                authorizationOptions: authorizationOptions,
                 allowAction: allowAction,
                 skipAction: skipAction,
+                failureAction: failureAction ?? self.failureAction,
                 bundle: bundle
             )
         }
@@ -80,6 +90,7 @@ public struct NotificationsPriming {
 
     let config: Configuration
     @State var isAnimating = false
+    @State var isLoading = false
 
     public init(config: Configuration) {
         self.config = config
@@ -88,6 +99,25 @@ public struct NotificationsPriming {
     func onAppear() {
         Animation.welcomeScreen.deferred {
             isAnimating = true
+        }
+    }
+
+    func requestAuthorizationAndProceed() {
+        isLoading = true
+        Task {
+            defer { isLoading = false }
+
+            do {
+                let granted = try await UNUserNotificationCenter.current()
+                    .requestAuthorization(options: config.authorizationOptions)
+                if granted {
+                    config.allowAction()
+                } else {
+                    config.failureAction?(false, nil)
+                }
+            } catch {
+                config.failureAction?(false, error)
+            }
         }
     }
 }

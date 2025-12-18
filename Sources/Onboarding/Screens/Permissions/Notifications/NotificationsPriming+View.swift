@@ -33,6 +33,12 @@ extension NotificationsPriming: View {
             }
             .buttonStyle(.borderedProminent)
             .tint(config.accentColor)
+            .overlay {
+                if isLoading {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                }
+            }
 
             if let skipAction = config.skipAction {
                 Button(action: skipAction) {
