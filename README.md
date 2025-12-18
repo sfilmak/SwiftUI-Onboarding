@@ -75,10 +75,11 @@ Onboarding includes localization for the following languages:
 import Onboarding
 import SwiftUI
 
-extension OnboardingConfiguration {
-    static let production = OnboardingConfiguration(
+extension WelcomeScreen {
+    static let production = WelcomeScreen.apple(
         accentColor: .blue,
         appDisplayName: "My Amazing App",
+        appIcon: Image("AppIcon"),
         features: [
             FeatureInfo(
                 image: Image(systemName: "star.fill"),
@@ -96,10 +97,13 @@ extension OnboardingConfiguration {
                 content: "Optimized performance for the best user experience."
             )
         ],
+        privacyPolicyURL: URL(string: "https://example.com/privacy"),
         titleSectionAlignment: .center
     )
 }
 ```
+
+`WelcomeScreen` conforms to `View`; render it directly inside the onboarding modifier and inject the continue action via `.with(continueAction:)`.
 
 2. **Add onboarding to your app's root view:**
 ```swift
@@ -111,13 +115,10 @@ struct MyApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .showOnboardingIfNeeded(
-                    config: .production,
-                    appIcon: Image("AppIcon"),
-                    dataPrivacyContent: {
-                        PrivacyPolicyView()
-                    }
-                )
+                .showOnboardingIfNeeded { markComplete in
+                    WelcomeScreen.production
+                        .with(continueAction: markComplete)
+                }
         }
     }
 }
@@ -130,18 +131,13 @@ struct MyApp: App {
 You can provide a custom action to perform when the user taps "Continue":
 ```swift
 ContentView()
-    .showOnboardingIfNeeded(
-        config: .production,
-        appIcon: Image("AppIcon"),
-        continueAction: {
+    .showOnboardingIfNeeded { markComplete in
+        WelcomeScreen.production.with(continueAction: {
             // Perform analytics, API calls, etc.
             Analytics.track("onboarding_completed")
-            // Note: Onboarding completion is handled automatically
-        },
-        dataPrivacyContent: {
-            PrivacyPolicyView()
-        }
-    )
+            markComplete()
+        })
+    }
 ```
 
 #### Custom Storage
@@ -151,14 +147,10 @@ Use a custom AppStorage key for tracking onboarding state:
 @AppStorage("myCustomOnboardingKey") private var customOnboardingState = false
 
 ContentView()
-    .showOnboardingIfNeeded(
-        storage: $customOnboardingState,
-        config: .production,
-        appIcon: Image("AppIcon"),
-        dataPrivacyContent: {
-            PrivacyPolicyView()
-        }
-    )
+    .showOnboardingIfNeeded(storage: $customOnboardingState) { markComplete in
+        WelcomeScreen.production
+            .with(continueAction: markComplete)
+    }
 ```
 
 #### Manual State Management
@@ -192,41 +184,67 @@ struct MyApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .presentOnboardingIfNeeded(
-                    config: .production,
-                    appIcon: Image("AppIcon"),
-                    dataPrivacyContent: {
-                        PrivacyPolicyView()
-                    }
-                )
+                .presentOnboardingIfNeeded { markComplete in
+                    WelcomeScreen.production
+                        .with(continueAction: markComplete)
+                }
         }
     }
 }
 ```
 
+#### Modern Welcome Screen
+
+Use the modern layout with feature cards and inline terms/privacy links:
+```swift
+let modern = WelcomeScreen.modern(
+    accentColor: .mint,
+    appDisplayName: "My Amazing App",
+    appIcon: Image("AppIcon"),
+    features: [
+        FeatureInfo(image: Image(systemName: "bolt.fill"), title: "Fast", content: "Optimized for speed."),
+        FeatureInfo(image: Image(systemName: "shield.fill"), title: "Secure", content: "Your data stays private.")
+    ],
+    termsOfServiceURL: URL(string: "https://example.com/terms")!,
+    privacyPolicyURL: URL(string: "https://example.com/privacy")!
+)
+
+ContentView()
+    .showOnboardingIfNeeded { markComplete in
+        modern.with(continueAction: markComplete)
+    }
+```
+
 #### Multi-Screen Onboarding Flows
 
-Need more than a single welcome screen? Both modifiers support a custom flow once the initial onboarding is completed, allowing you to show setup, permissions, or tutorials before marking onboarding as complete.
+Need more than a single welcome screen? Build whatever flow you need inside the onboarding builder and call `markComplete()` when you're done.
 ```swift
-.showOnboardingIfNeeded(
-    config: .production,
-    appIcon: Image("AppIcon"),
-    dataPrivacyContent: {
-        PrivacyPolicyView()
-    },
-    flowContent: {
-        CustomTutorialView(onFinish: { /* do something */ })
+.showOnboardingIfNeeded { markComplete in
+    NavigationStack {
+        CustomTutorialView(onFinish: markComplete)
     }
-)
+}
 ```
 
 ## Configuration Options
 
-### OnboardingConfiguration
+### WelcomeScreen
+
+- `.apple(AppleWelcomeScreen.Configuration)`: Apple-style hero layout with feature list and continue controls.
+  - Convenience factory: `WelcomeScreen.apple(...)` produces the Apple-style welcome screen configuration you see in the examples.
+  - Required: `appIcon`, `appDisplayName`, `features`
+  - Optional: `accentColor`, `privacyPolicyURL`, `titleSectionAlignment`
+- `.modern(ModernWelcomeScreen.Configuration)`: Card-based feature layout with inline terms/privacy links.
+  - Required: `appIcon`, `appDisplayName`, `features`, `termsOfServiceURL`, `privacyPolicyURL`
+  - Optional: `accentColor`, `titleSectionAlignment`
+
+### AppleWelcomeScreen.Configuration
 
 - `accentColor`: Primary color used throughout the onboarding (default: `.blue`)
 - `appDisplayName`: Your app's display name shown in the welcome section
+- `appIcon`: The app icon image
 - `features`: Array of `FeatureInfo` objects to showcase
+- `privacyPolicyURL`: URL to open when the privacy text is tapped
 - `titleSectionAlignment`: Horizontal alignment for the title (`.leading`, `.center`, `.trailing`)
 
 ### FeatureInfo

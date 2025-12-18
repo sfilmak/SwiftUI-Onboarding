@@ -5,12 +5,23 @@ All notable changes to SwiftUI-Onboarding (formerly OnboardingKit) will be docum
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- BREAKING: `.showOnboardingIfNeeded` and `.presentOnboardingIfNeeded` now only manage storage/presentation state and take an `onboardingContent` view builder. Provide your onboarding UI and call the supplied `markComplete` action when finished.
+- `WelcomeScreen` now conforms to `View` directly—use `.with(continueAction:)` to inject your completion handler instead of wrapping in a separate view type.
+
+### Added
+- New `WelcomeScreen.modern` layout with card-style feature list and inline terms/privacy links.
+
 ## [2.1.4] - 2025-10-24
 
 ### Added
 - **Bulgarian Language Localization**: Added Bulgarian language support to the localization system.
-- **Sign-in with Apple Button**: New `SignInWithAppleButtonConfiguration` and button component for easy Apple Sign-In integration.
 - **CHANGELOG**: Added this changelog file to track all notable changes to the project.
+
+### Removed
+- Sign in with Apple configuration and button helpers have been removed from the package.
 
 ## [2.1.3] - 2025-10-03
 
@@ -20,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.1.2] - 2025-07-04
 
 ### Added
-- `StyledSheet` now adds a dismiss button to the Data Privacy screen when presented in a sheet.
+- `StyledSheet` now adds a dismiss button to the Data Privacy screen when presented in a sheet. *(Deprecated/removed in 3.x refactors.)*
 
 ## [2.1.1] - 2025-07-03
 
@@ -48,7 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **BREAKING**: Now requires Swift 6, iOS 18+, and macOS 15+ minimum.
-- **BREAKING**: `OnboardingConfiguration` has changed—please update your usage accordingly.
+- **BREAKING**: `OnboardingConfiguration` was removed in favor of passing `WelcomeScreen` directly.
 - **BREAKING**: You now provide your app's display name explicitly.
 - **BREAKING**: Data privacy is specified as a SwiftUI view.
 

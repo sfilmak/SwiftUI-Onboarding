@@ -1,6 +1,5 @@
 //
-//  Animation+Welcome.swift
-//  OnboardingKit
+//  Animation+.swift
 //
 //  Created by James Sedlacek on 7/3/25.
 //

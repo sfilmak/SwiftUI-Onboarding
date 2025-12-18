@@ -1,5 +1,5 @@
 //
-//  BottomSection.swift
+//  AppleBottomSection.swift
 //  
 //
 //  Created by James Sedlacek on 12/30/23.
@@ -8,27 +8,24 @@
 import SwiftUI
 
 @MainActor
-struct BottomSection<C: View> {
+struct AppleBottomSection {
     private let accentColor: Color
     private let appDisplayName: String
+    private let privacyPolicyURL: URL?
     private let continueAction: () -> Void
-    private let signInWithAppleConfiguration: SignInWithAppleButtonConfiguration?
-    private let dataPrivacyContent: () -> C
-    @State private var isDataPrivacyPresented: Bool = false
     @State private var isAnimating: Bool = false
+    @Environment(\.openURL) private var openURL
 
     init(
         accentColor: Color,
         appDisplayName: String,
-        continueAction: @escaping () -> Void,
-        signInWithAppleConfiguration: SignInWithAppleButtonConfiguration? = nil,
-        @ViewBuilder dataPrivacyContent: @escaping () -> C
+        privacyPolicyURL: URL?,
+        continueAction: @escaping () -> Void
     ) {
         self.accentColor = accentColor
         self.appDisplayName = appDisplayName
+        self.privacyPolicyURL = privacyPolicyURL
         self.continueAction = continueAction
-        self.signInWithAppleConfiguration = signInWithAppleConfiguration
-        self.dataPrivacyContent = dataPrivacyContent
     }
 
     private func onAppear() {
@@ -38,12 +35,13 @@ struct BottomSection<C: View> {
     }
 
     private func disclosureAction() {
-        isDataPrivacyPresented.toggle()
+        guard let privacyPolicyURL else { return }
+        openURL(privacyPolicyURL)
     }
 }
 
 @MainActor
-extension BottomSection: View {
+extension AppleBottomSection: View {
     var body: some View {
         VStack(alignment: .center, spacing: .zero) {
             dataPrivacyImage
@@ -56,20 +54,10 @@ extension BottomSection: View {
         .mask(opacityLinearGradient)
         .opacity(isAnimating ? 1 : 0)
         .onAppear(perform: onAppear)
-        .styledSheet(
-            isPresented: $isDataPrivacyPresented,
-            content: dataPrivacySheet
-        )
-    }
-
-    private func dataPrivacySheet() -> some View {
-        NavigationStack {
-            dataPrivacyContent()
-        }
     }
 
     private var dataPrivacyImage: some View {
-        Image(.onboardingKitDataPrivacy)
+        Image(.dataPrivacyResource)
             .resizable()
             .foregroundStyle(accentColor)
             .frame(width: 40, height: 40)
@@ -92,22 +80,14 @@ extension BottomSection: View {
         .onTapGesture(perform: disclosureAction)
     }
 
-    @ViewBuilder
     private var continueButton: some View {
-        if let signInWithAppleConfiguration {
-            SignInWithAppleButtonView(
-                configuration: signInWithAppleConfiguration,
-                continueAction: continueAction
-            )
-        } else {
-            Button(
-                action: continueAction,
-                label: continueText
-            )
-            .font(.title3.weight(.medium))
-            .buttonStyle(.borderedProminent)
-            .tint(accentColor)
-        }
+        Button(
+            action: continueAction,
+            label: continueText
+        )
+        .font(.title3.weight(.medium))
+        .buttonStyle(.borderedProminent)
+        .tint(accentColor)
     }
 
     private func continueText() -> some View {
@@ -131,14 +111,12 @@ extension BottomSection: View {
         Spacer()
     }
     .safeAreaInset(edge: .bottom) {
-        BottomSection(
+        AppleBottomSection(
             accentColor: .blue,
             appDisplayName: .init("Test App"),
+            privacyPolicyURL: URL(string: "https://example.com/privacy"),
             continueAction: {
                 print("Continue Tapped")
-            },
-            dataPrivacyContent: {
-                Text("Privacy Policy Content")
             }
         )
     }

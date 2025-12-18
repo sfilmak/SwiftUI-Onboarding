@@ -1,6 +1,5 @@
 //
 //  Binding+Inverse.swift
-//  OnboardingKit
 //
 //  Created by James Sedlacek on 6/28/25.
 //

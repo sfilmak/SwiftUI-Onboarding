@@ -1,6 +1,6 @@
 //
-//  TitleSection.swift
-//  
+//  AppleTitleSection.swift
+//
 //
 //  Created by James Sedlacek on 12/30/23.
 //
@@ -8,20 +8,17 @@
 import SwiftUI
 
 @MainActor
-struct TitleSection {
-    private let config: OnboardingConfiguration
-    private let appIcon: Image
-    private let shouldHideAppIcon: Bool
+struct AppleTitleSection {
+    private let config: AppleWelcomeScreen.Configuration
+    private let shouldShowAppIcon: Bool
     @State private var isAnimating = false
 
     init(
-        config: OnboardingConfiguration,
-        appIcon: Image,
-        shouldHideAppIcon: Bool
+        config: AppleWelcomeScreen.Configuration,
+        shouldShowAppIcon: Bool
     ) {
         self.config = config
-        self.appIcon = appIcon
-        self.shouldHideAppIcon = shouldHideAppIcon
+        self.shouldShowAppIcon = shouldShowAppIcon
     }
 
     private func onAppear() {
@@ -32,7 +29,7 @@ struct TitleSection {
 }
 
 @MainActor
-extension TitleSection: View {
+extension AppleTitleSection: View {
     var body: some View {
         VStack(alignment: config.titleSectionAlignment, spacing: 2) {
             appIconView
@@ -53,8 +50,8 @@ extension TitleSection: View {
 
     @ViewBuilder
     private var appIconView: some View {
-        if shouldHideAppIcon {
-            appIcon
+        if shouldShowAppIcon {
+            config.appIcon
                 .resizable()
                 .frame(width: 60, height: 60)
                 .clipShape(.rect(cornerRadius: 10))
@@ -64,7 +61,7 @@ extension TitleSection: View {
 
     private var welcomeToText: some View {
         Text(.onboardingWelcomeTo, bundle: .module)
-            .foregroundColor(.primary)
+            .foregroundStyle(.primary)
             .fontWeight(.semibold)
     }
 
@@ -76,9 +73,8 @@ extension TitleSection: View {
 }
 
 #Preview {
-    TitleSection(
+    AppleTitleSection(
         config: .mock,
-        appIcon: Image(.onboardingKitMockAppIcon),
-        shouldHideAppIcon: true
+        shouldShowAppIcon: true
     )
 }

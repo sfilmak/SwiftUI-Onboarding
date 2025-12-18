@@ -1,6 +1,5 @@
 //
 //  AppStorage+Onboarding.swift
-//  OnboardingKit
 //
 //  Created by James Sedlacek on 6/27/25.
 //

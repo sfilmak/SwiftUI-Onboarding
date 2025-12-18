@@ -1,6 +1,5 @@
 //
 //  Animation+Deferred.swift
-//  OnboardingKit
 //
 //  Created by James Sedlacek on 7/3/25.
 //
