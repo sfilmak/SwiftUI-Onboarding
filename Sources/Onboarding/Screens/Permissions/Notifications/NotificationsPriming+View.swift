@@ -148,8 +148,8 @@ extension NotificationsPriming: View {
             Text(config.subtitle, bundle: config.bundle)
                 .font(.body.weight(.medium))
                 .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
         }
+        .multilineTextAlignment(.center)
         .frame(maxWidth: .infinity)
     }
 }
