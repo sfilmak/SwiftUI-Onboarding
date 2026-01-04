@@ -5,6 +5,7 @@
 //
 
 import SwiftUI
+import UserNotifications
 
 /// Defines available permission priming screens.
 @MainActor
