@@ -44,8 +44,10 @@ struct AppleBottomSection {
 extension AppleBottomSection: View {
     var body: some View {
         VStack(alignment: .center, spacing: .zero) {
-            dataPrivacyImage
-            disclosureText
+            if privacyPolicyURL != nil {
+                dataPrivacyImage
+                disclosureText
+            }
             continueButton
         }
         .padding(.horizontal, 28)
